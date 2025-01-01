@@ -73,9 +73,10 @@
         <table class="table table-striped mt-3">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Value</th>
+                    <th>Where</th>
+                    <th>Humidity</th>
+                    <th>Pressure</th>
+                    <th>Temperature</th>
                 </tr>
             </thead>
             <tbody id="data-table">
@@ -99,12 +100,17 @@
         document.addEventListener('DOMContentLoaded', (event) => {
             const data = JSON.parse('{{ data|tojson }}');
             const tableBody = document.getElementById('data-table');
-            Object.keys(data).forEach((key, index) => {
+            const locations = {
+                "kitchen": "Kitchen",
+                "outside": "Outside"
+            };
+            Object.keys(data).forEach((location) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${key}</td>
-                    <td>${data[key]}</td>
+                    <td>${locations[location]}</td>
+                    <td>${data[location].humidity}</td>
+                    <td>${data[location].pressure}</td>
+                    <td>${data[location].temp}</td>
                 `;
                 tableBody.appendChild(row);
             });
