@@ -3,7 +3,7 @@ from ruuvitag_sensor.ruuvi import RuuviTagSensor
 from flask import Flask, render_template, request, redirect, url_for
 import os
 #import matplotlib.pyplot as plt
-import pandas as pd
+#import pandas as pd
 import threading
 
 app = Flask(__name__)
