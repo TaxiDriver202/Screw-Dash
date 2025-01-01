@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
         .dark-mode {
             background-color: #121212;
@@ -70,6 +71,9 @@
 <body>
     <div class="container">
         <h1 class="mt-5">Dashboard</h1>
+        <div id="connection-status" class="alert alert-info">
+            Connecting to server...
+        </div>
         <table class="table table-striped mt-3">
             <thead>
                 <tr>
@@ -77,6 +81,9 @@
                     <th>Humidity</th>
                     <th>Pressure</th>
                     <th>Temperature</th>
+                    <th>Acceleration X</th>
+                    <th>Acceleration Y</th>
+                    <th>Acceleration Z</th>
                 </tr>
             </thead>
             <tbody id="data-table">
@@ -86,7 +93,6 @@
     </div>
 
     <!-- Dark mode toggle switch -->
-
     <div class="toggle-switch">
         <label for="darkModeSwitch">Dark Mode:</label>
         <label class="switch">
@@ -95,44 +101,68 @@
         </label>
     </div>
 
-    <!-- Delete ID and add accel xyz? and labels correctly-->
     <script>
+        // Initialize Socket.IO
+        const socket = io();
+        const connectionStatus = document.getElementById('connection-status');
+        const locations = {
+            "kitchen": "Kitchen",
+            "outside": "Outside"
+        };
+
+        // Connection status handlers
+        socket.on('connect', () => {
+            connectionStatus.className = 'alert alert-success';
+            connectionStatus.textContent = 'Connected to server';
+        });
+
+        socket.on('disconnect', () => {
+            connectionStatus.className = 'alert alert-danger';
+            connectionStatus.textContent = 'Disconnected from server';
+        });
+
+        // Initial data load
         document.addEventListener('DOMContentLoaded', (event) => {
-            const data = JSON.parse('{{ data|tojson }}');
+            const initialData = JSON.parse('{{ data|tojson }}');
+            updateTable(initialData);
+        });
+
+        // Update data when received from server
+        socket.on('data_update', function(data) {
+            updateTable(data);
+        });
+
+        function updateTable(data) {
             const tableBody = document.getElementById('data-table');
-            const locations = {
-                "kitchen": "Kitchen",
-                "outside": "Outside"
-            };
+            tableBody.innerHTML = '';
             Object.keys(data).forEach((location) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${locations[location]}</td>
-                    <td>${data[location].humidity}</td>
-                    <td>${data[location].pressure}</td>
-                    <td>${data[location].temp}</td>
+                    <td>${data[location].humidity.toFixed(2)}</td>
+                    <td>${data[location].pressure.toFixed(2)}</td>
+                    <td>${data[location].temp.toFixed(2)}</td>
+                    <td>${data[location].acceleration_x.toFixed(3)}</td>
+                    <td>${data[location].acceleration_y.toFixed(3)}</td>
+                    <td>${data[location].acceleration_z.toFixed(3)}</td>
                 `;
                 tableBody.appendChild(row);
             });
-        });
-    </script>
-
-    <!-- JS for persistent Dark mode  -->
-    <script>
-    // Function to toggle dark mode and save preference in localStorage
-    function toggleDarkMode() {
-        document.body.classList.toggle("dark-mode");
-        let darkMode = document.body.classList.contains("dark-mode");
-        localStorage.setItem("darkMode", darkMode);
-    }
-
-    // Check localStorage for dark mode preference and apply it
-    window.onload = function() {
-        if (localStorage.getItem("darkMode") === "true") {
-            document.body.classList.add("dark-mode");
-            document.getElementById("darkModeSwitch").checked = true;
         }
-    }
+
+        // Dark mode functionality
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            let darkMode = document.body.classList.contains("dark-mode");
+            localStorage.setItem("darkMode", darkMode);
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark-mode");
+                document.getElementById("darkModeSwitch").checked = true;
+            }
+        }
     </script>
 </body>
 </html>
