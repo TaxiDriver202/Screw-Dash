@@ -97,7 +97,7 @@
     <!-- Delete ID and add accel xyz? and labels correctly-->
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            const data = {{ data|tojson }};
+            const data = JSON.parse('{{ data|tojson }}');
             const tableBody = document.getElementById('data-table');
             Object.keys(data).forEach((key, index) => {
                 const row = document.createElement('tr');
