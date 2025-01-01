@@ -20,6 +20,8 @@ outside = {
     "pressure1": 0
 }
 
+#todo: labels corrected
+
 async def collect_data():
     async for found_data in RuuviTagSensor.get_data_async():
        # print(f"MAC: {found_data[0]}")
